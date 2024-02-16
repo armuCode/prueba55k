@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/indent */
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import "./App.css";
 import { type User } from "./types.d";
 import UserList from "./components/UserList";
@@ -8,6 +8,8 @@ function App() {
   const [users, setUsers] = useState<User[]>([]);
   const [showColor, setShowColor] = useState<boolean>(false);
   const [sortByCountry, setSortByCountry] = useState<boolean>(false);
+  const originalUsers = useRef<User[]>([]);
+  const [filterCountry, setFilterCountry] = useState<string | null>(null);
 
   function toggleColors() {
     setShowColor(!showColor);
@@ -22,6 +24,7 @@ function App() {
       .then(async (res) => await res.json())
       .then((res) => {
         setUsers(res.results);
+        originalUsers.current = res.results;
       })
       .catch((err) => {
         console.log(err);
@@ -39,17 +42,28 @@ function App() {
     setUsers(filteredUsers);
   };
 
+  function handleReset() {
+    setUsers(originalUsers.current);
+  }
+
   return (
     <div className="App">
-      <h1>Prueba tecnica</h1>
-      <header>
-        <main>
+      <main>
+        <h1>Prueba tecnica</h1>
+        <header>
           <button onClick={toggleColors}>Color</button>
           <button onClick={toggleSortByCountry}>
             {sortByCountry ? "No ordenar por pais" : "ordenar por pais"}
           </button>
-        </main>
-      </header>
+          <button onClick={handleReset}>Reset</button>
+          <input
+            placeholder="Buscar por pais"
+            onChange={(e) => {
+              setFilterCountry(e.target.value);
+            }}
+          />
+        </header>
+      </main>
       <UserList
         users={sortedUsers}
         showColor={showColor}
